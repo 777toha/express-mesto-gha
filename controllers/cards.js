@@ -42,7 +42,7 @@ const deleteCard = (req, res, next) => {
           })
           .catch(err => {
             if (err) {
-              res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+              res.status(NOTFOUND_CODE).send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
             }
           })
           .catch(next);
@@ -53,7 +53,7 @@ const deleteCard = (req, res, next) => {
     .catch((err) => {
       if (req.params.cardId.length !== 24) {
         return res.status(BADREQ_CODE).send({ message: err.message });
-      } else if (err.name === 'CastError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });

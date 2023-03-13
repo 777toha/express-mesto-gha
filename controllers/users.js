@@ -40,7 +40,7 @@ const getUsersById = (req, res, next) => {
     .catch(err => {
       if (req.params.userId.length !== 24) {
         return res.status(BADREQ_CODE).send({ message: err.message });
-      } else if (err.name === 'CastError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });
