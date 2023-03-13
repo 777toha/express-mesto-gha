@@ -33,6 +33,7 @@ const postUsers = (req, res, next) => {
 
 const getUsersById = (req, res, next) => {
   User.findById(req.params.userId)
+    .orFail()
     .then((user) => {
       res.send(user)
     })

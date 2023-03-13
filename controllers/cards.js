@@ -88,6 +88,7 @@ const deleteCardLike = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then(user => {
       res.send(user);
     })
