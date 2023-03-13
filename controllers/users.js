@@ -45,7 +45,6 @@ const getUsersById = (req, res, next) => {
         return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
-    .catch(next);
 }
 
 const patchUsersInfo = (req, res, next) => {

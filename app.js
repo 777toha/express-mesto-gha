@@ -30,8 +30,8 @@ app.use((req, res, next) => {
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
-app.use('*', () => {
-  throw new Error.status(NOTFOUND_CODE).send({ message: 'Запрашиваемый ресурс не найден' });
+app.use('*', (req, res) => {
+  return res.status(NOTFOUND_CODE).send({ message: 'Запрашиваемый ресурс не найден' });
 })
 app.listen(PORT, () => {
   console.log(`Port ${PORT}`);
