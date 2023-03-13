@@ -1,12 +1,17 @@
 const express = require('express');
 const User = require('../models/user');
+const BADREQ_CODE = 400;
+const NOTFOUND_CODE = 404;
+const CONFLICT_CODE = 500;
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch(err => {
-      if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+      if (err.name === 'ValidationError') {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
     .catch(next);
@@ -17,8 +22,10 @@ const postUsers = (req, res, next) => {
   User.create({ name, about, avatar })
     .then((users) => res.send(users))
     .catch(err => {
-      if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+      if (err.name === 'ValidationError') {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
     .catch(next);
@@ -30,8 +37,10 @@ const getUsersById = (req, res, next) => {
       res.send(user)
     })
     .catch(err => {
-      if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+      if (err.name === 'CastError') {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
     .catch(next);
