@@ -37,7 +37,9 @@ const getUsersById = (req, res, next) => {
       res.send(user)
     })
     .catch(err => {
-      if (err.name === 'CastError') {
+      if (req.params.userId.length !== 24) {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else if (err.name === 'CastError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });

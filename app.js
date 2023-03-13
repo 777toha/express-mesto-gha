@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const mongoose = require('mongoose');
+const NOTFOUND_CODE = 404;
 
 const app = express();
 const PORT = 3000;
@@ -30,7 +31,7 @@ app.use((req, res, next) => {
 app.use('/', userRouter);
 app.use('/', cardRouter);
 app.use('*', () => {
-  throw new Error({ message: 'Запрашиваемый ресурс не найден' });
+  throw new Error.status(NOTFOUND_CODE).send({ message: 'Запрашиваемый ресурс не найден' });
 })
 app.listen(PORT, () => {
   console.log(`Port ${PORT}`);

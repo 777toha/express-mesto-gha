@@ -33,6 +33,7 @@ const deleteCard = (req, res, next) => {
   const userId = req.user._id;
 
   Cards.findById(req.params.cardId)
+    .orFail()
     .then((card) => {
       if (card.owner == userId) {
         Cards.findByIdAndDelete(req.params.cardId)
@@ -66,19 +67,19 @@ const putCardLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then(user => {
       res.send(user);
     })
     .catch(err => {
       if (req.params.cardId.length !== 24) {
         return res.status(BADREQ_CODE).send({ message: err.message });
-      } else if (err.name === 'CastError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
-    .catch(next);
 }
 
 const deleteCardLike = (req, res, next) => {
@@ -93,13 +94,12 @@ const deleteCardLike = (req, res, next) => {
     .catch(err => {
       if (req.params.cardId.length !== 24) {
         return res.status(BADREQ_CODE).send({ message: err.message });
-      } else if (err.name === 'CastError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
-    .catch(next);
 }
 
 module.exports = {
