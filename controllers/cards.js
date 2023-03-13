@@ -1,5 +1,8 @@
 const express = require('express');
 const Cards = require('../models/cards');
+const BADREQ_CODE = 400;
+const NOTFOUND_CODE = 404;
+const CONFLICT_CODE = 500;
 
 const getCards = (req, res, next) => {
   Cards.find({})
@@ -17,8 +20,10 @@ const postCard = (req, res, next) => {
       res.send(user);
     })
     .catch(err => {
-      if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+      if (err.name === 'ValidationError') {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
       }
     })
     .catch(next);
@@ -44,8 +49,14 @@ const deleteCard = (req, res, next) => {
         return res.send('Вы не можете удалить карточку, если вы не являетесь ее создателем')
       }
     })
-    .catch(() => {
-      res.send('Карточка с таким id не найдена');
+    .catch((err) => {
+      if (req.params.cardId.length !== 24) {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else if (err.name === 'CastError') {
+        return res.status(NOTFOUND_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
+      }
     })
 }
 
@@ -55,15 +66,19 @@ const putCardLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-  .then(user => {
-    res.send(user);
-  })
-  .catch(err => {
-    if (err) {
-      res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
-    }
-  })
-  .catch(next);
+    .then(user => {
+      res.send(user);
+    })
+    .catch(err => {
+      if (req.params.cardId.length !== 24) {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else if (err.name === 'CastError') {
+        return res.status(NOTFOUND_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
+      }
+    })
+    .catch(next);
 }
 
 const deleteCardLike = (req, res, next) => {
@@ -72,15 +87,19 @@ const deleteCardLike = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-  .then(user => {
-    res.send(user);
-  })
-  .catch(err => {
-    if (err) {
-      res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
-    }
-  })
-  .catch(next);
+    .then(user => {
+      res.send(user);
+    })
+    .catch(err => {
+      if (req.params.cardId.length !== 24) {
+        return res.status(BADREQ_CODE).send({ message: err.message });
+      } else if (err.name === 'CastError') {
+        return res.status(NOTFOUND_CODE).send({ message: err.message });
+      } else {
+        return res.status(CONFLICT_CODE).send({ message: err.message });
+      }
+    })
+    .catch(next);
 }
 
 module.exports = {

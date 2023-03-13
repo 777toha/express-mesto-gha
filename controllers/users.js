@@ -38,7 +38,7 @@ const getUsersById = (req, res, next) => {
     })
     .catch(err => {
       if (err.name === 'CastError') {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
         return res.status(CONFLICT_CODE).send({ message: err.message });
       }
@@ -47,12 +47,12 @@ const getUsersById = (req, res, next) => {
 }
 
 const patchUsersInfo = (req, res, next) => {
-  const userId  = req.user._id;
+  const userId = req.user._id;
   const { name, about } = req.body;
   if (!name) {
-    return res.status(400).send('Переданы некорректные данные при обновлении имени профиля.')
+    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении имени профиля.' })
   } else if (!about) {
-    return res.status(400).send('Переданы некорректные данные при обновлении професиии профиля.')
+    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении професиии профиля.' })
   }
   User.findByIdAndUpdate(userId, { name, about }, { new: true })
     .then((user) => {
@@ -60,17 +60,17 @@ const patchUsersInfo = (req, res, next) => {
     })
     .catch((err) => {
       if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+        return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' })
       }
     })
     .catch(next);
 }
 
 const patchUsersAvatar = (req, res, next) => {
-  const userId  = req.user._id;
+  const userId = req.user._id;
   const { avatar } = req.body;
   if (!avatar) {
-    return res.status(400).send('Переданы некорректные данные при обновлении профиля.')
+    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' })
   }
   User.findByIdAndUpdate(userId, { avatar }, { new: true })
     .then((user) => {
@@ -78,7 +78,7 @@ const patchUsersAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err) {
-        res.send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+        return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении имени профиля.' })
       }
     })
     .catch(next);
