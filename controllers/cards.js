@@ -23,7 +23,7 @@ const postCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return res.status(BADREQ_CODE).send({ message: err.message });
       } else {
-        return res.status(CONFLICT_CODE).send({ message: err.message });
+        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
       }
     })
     .catch(next);
@@ -56,7 +56,7 @@ const deleteCard = (req, res, next) => {
       } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
-        return res.status(CONFLICT_CODE).send({ message: err.message });
+        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
       }
     })
 }
@@ -77,7 +77,7 @@ const putCardLike = (req, res, next) => {
       } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
-        return res.status(CONFLICT_CODE).send({ message: err.message });
+        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
       }
     })
 }
@@ -98,7 +98,7 @@ const deleteCardLike = (req, res, next) => {
       } else if (err.name === 'DocumentNotFoundError') {
         return res.status(NOTFOUND_CODE).send({ message: err.message });
       } else {
-        return res.status(CONFLICT_CODE).send({ message: err.message });
+        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
       }
     })
 }

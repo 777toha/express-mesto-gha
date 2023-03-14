@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const urlRegExp = new RegExp('^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w.-]+)+[\\w\\-._~:/?#[\\]@!$&\'()*+,;=.]+$');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,6 +17,10 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => urlRegExp.test(v),
+      message: 'Здесь должна быть ссылка',
+    },
   }
 });
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const urlRegExp = new RegExp('^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w.-]+)+[\\w\\-._~:/?#[\\]@!$&\'()*+,;=.]+$');
 
 const cardsSchema = new mongoose.Schema({
   name: {
@@ -10,6 +11,10 @@ const cardsSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => urlRegExp.test(v),
+      message: 'Здесь должна быть ссылка',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
