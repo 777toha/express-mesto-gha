@@ -1,8 +1,16 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
 const BADREQ_CODE = 400;
 const NOTFOUND_CODE = 404;
 const CONFLICT_CODE = 500;
+
+const getMe = (req, res, next) => {
+  User.findById(req.user._id)
+  .then(user => res.send(user));
+}
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -18,17 +26,25 @@ const getUsers = (req, res, next) => {
 }
 
 const postUsers = (req, res, next) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((users) => res.send(users))
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(BADREQ_CODE).send({ message: err.message });
-      } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
-      }
+  const { name, about, avatar, email, password } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({ name, about, avatar, email, password: hash })
+        .then((users) => res.send({
+          name: users.name,
+          about: users.about,
+          avatar: users.avatar,
+          email: users.email
+        }))
+        .catch(err => {
+          if (err.name === 'ValidationError') {
+            return res.status(BADREQ_CODE).send({ message: err.message });
+          } else {
+            return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+          }
+        })
+        .catch(next);
     })
-    .catch(next);
 }
 
 const getUsersById = (req, res, next) => {
@@ -86,10 +102,37 @@ const patchUsersAvatar = (req, res, next) => {
     .catch(next);
 }
 
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).select('+password')
+    .orFail()
+    .then(async (user) => {
+      if (!user) {
+        res.send('Неправильные почта или пароль');
+      }
+      const data = await bcrypt.compare(password, user.password);
+      if (data) {
+        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        res.cookie('jwt', token, {
+          httpOnly: true
+        }).send(user);
+      } else {
+        res.send('Неправильные почта или пароль');
+      }
+    })
+    .catch(err => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    })
+};
+
 module.exports = {
   getUsers,
   postUsers,
   getUsersById,
   patchUsersInfo,
-  patchUsersAvatar
+  patchUsersAvatar,
+  login,
+  getMe
 };

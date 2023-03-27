@@ -1,10 +1,13 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const { postUsers, login } = require('./controllers/users');
+const { loginValidation, postUsersValidation } = require('./middlewares/validate')
+const { auth } = require('./middlewares/auth');
 const mongoose = require('mongoose');
-const NOTFOUND_CODE = 404;
 
 const app = express();
 const PORT = 3000;
@@ -18,21 +21,29 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
   });
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '640da37b3c6889cd461c65a2'
-  }
 
-  next();
-});
+app.post('/sign-up', postUsersValidation, postUsers);
 
+app.post('/sign-in', loginValidation, login);
+
+app.use(auth);
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
-app.use('', (req, res) => {
-  return res.status(NOTFOUND_CODE).send({ message: 'Запрашиваемый ресурс не найден' });
+
+app.use('', (req, res, next) => {
+  const err = new Error('Запрашиваемый ресурс не найден');
+  err.statusCode = 404;
+
+  next(err);
 })
+
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
+
 app.listen(PORT, () => {
   console.log(`Port ${PORT}`);
 });
