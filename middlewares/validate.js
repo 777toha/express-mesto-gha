@@ -10,18 +10,32 @@ const getUsersByIdValidation = celebrate({
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    email: Joi.string().required().email().messages({
+      'any.require': 'Некорректный email'
+    }),
+    password: Joi.string().required().messages({
+      'any.require': 'Некорректный пароль'
+    }),
   }),
 });
 
 const postUsersValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(urlRegExp),
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    name: Joi.string().min(2).max(30).messages({
+      'any.require': 'Некорректное имя пользователя'
+    }),
+    about: Joi.string().min(2).max(30).messages({
+      'any.require': 'Некорректное информация о пользователи'
+    }),
+    avatar: Joi.string().pattern(urlRegExp).messages({
+      'any.require': 'Некорректная ссылка'
+    }),
+    email: Joi.string().required().email().messages({
+      'any.require': 'Некорректный email'
+    }),
+    password: Joi.string().required().messages({
+      'any.require': 'Некорректный пароль'
+    }),
   }),
 });
 

@@ -123,7 +123,7 @@ const login = (req, res, next) => {
     .catch(err => {
       res
         .status(401)
-        .send({ message: err.message });
+        .send( 'Ошибка' );
     })
 };
 
