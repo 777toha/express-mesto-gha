@@ -40,13 +40,13 @@ const postUsers = (req, res, next) => {
         }))
         .catch(err => {
           if (err.name === 'ValidationError') {
-            return res.status(BADREQ_CODE).send({ message: err.message });
+            next(new BadRequestError('Некорректные данные'));
           }
           if (err.name === 'MongoServerError') {
-              return res.status(409).send({ message: 'Такой email уже существует' });
+            next(new ConflictError('Такой email уже существует'));
           }
           else {
-            return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+            next(new InternalServerError('На сервере произошла ошибка'));
           }
         })
         .catch(next);
@@ -61,11 +61,11 @@ const getUsersById = (req, res, next) => {
     })
     .catch(err => {
       if (req.params.userId.length !== 24) {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOTFOUND_CODE).send({ message: err.message });
+        next(new ConflictError('Такой email уже существует'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     })
 }
@@ -74,9 +74,9 @@ const patchUsersInfo = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
   if (!name) {
-    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении имени профиля.' })
+    next(new BadRequestError('Некорректные данные'));
   } else if (!about) {
-    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении професиии профиля.' })
+    next(new BadRequestError('Некорректные данные'));
   }
   User.findByIdAndUpdate(userId, { name, about }, { new: true })
     .then((user) => {
@@ -84,17 +84,16 @@ const patchUsersInfo = (req, res, next) => {
     })
     .catch((err) => {
       if (err) {
-        return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' })
+        next(new BadRequestError('Некорректные данные'));
       }
     })
-    .catch(next);
 }
 
 const patchUsersAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
   if (!avatar) {
-    return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' })
+    next(new BadRequestError('Некорректные данные'));
   }
   User.findByIdAndUpdate(userId, { avatar }, { new: true })
     .then((user) => {
@@ -102,7 +101,7 @@ const patchUsersAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err) {
-        return res.status(BADREQ_CODE).send({ message: 'Переданы некорректные данные при обновлении имени профиля.' })
+        next(new BadRequestError('Некорректные данные'));
       }
     })
     .catch(next);
@@ -114,7 +113,7 @@ const login = (req, res, next) => {
     .orFail()
     .then(async (user) => {
       if (!user) {
-        return res.status(401).send({ message: 'Неправильные почта или пароль' });
+        next(new BadRequestError('Неправильные почта или пароль'));
       }
       const data = await bcrypt.compare(password, user.password);
       if (data) {
@@ -123,13 +122,11 @@ const login = (req, res, next) => {
           httpOnly: true
         }).send(user);
       } else {
-        return res.status(401).send({ message: 'Неправильные почта или пароль' });
+        next(new BadRequestError('Неправильные почта или пароль'));
       }
     })
     .catch(err => {
-      res
-        .status(401)
-        .send({ message: 'Неправильные почта или пароль' });
+      next(new BadRequestError('Неправильные почта или пароль'));
     })
 };
 

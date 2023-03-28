@@ -14,6 +14,7 @@ const auth = (req, res, next) => {
 
     next(err);
   }
+  console.log(req.user);
 };
 
 module.exports = {
