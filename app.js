@@ -25,7 +25,6 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.post('/signup', postUsersValidation, postUsers);
-
 app.post('/signin', loginValidation, login);
 
 app.use(auth);

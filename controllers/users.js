@@ -3,9 +3,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const BADREQ_CODE = 400;
-const NOTFOUND_CODE = 404;
-const CONFLICT_CODE = 500;
+
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const InternalServerError = require('../errors/InternalServerError');
+const ConflictError = require('../errors/ConflictError');
 
 const getMe = (req, res, next) => {
   User.findById(req.user._id)
@@ -17,9 +19,9 @@ const getUsers = (req, res, next) => {
     .then((users) => res.send(users))
     .catch(err => {
       if (err.name === 'ValidationError') {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new ConflictError('На сервере произошла ошибка'));
       }
     })
     .catch(next);

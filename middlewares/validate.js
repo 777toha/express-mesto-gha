@@ -4,13 +4,13 @@ const urlRegExp = /(http:\/\/|https:\/\/)(www)*[a-z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$
 
 const getUsersByIdValidation = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().length(24),
+    userId: Joi.string().length(24).hex(),
   }),
 });
 
 const getCardsByIdValidation = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().length(24),
+    cardId: Joi.string().length(24).hex(),
   }),
 });
 
