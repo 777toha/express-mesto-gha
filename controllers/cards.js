@@ -47,7 +47,7 @@ const deleteCard = (req, res, next) => {
           })
           .catch(next);
       } else {
-        return res.send('Вы не можете удалить карточку, если вы не являетесь ее создателем')
+        return res.status(403).send({ message: 'Вы не можете удалить карточку, если вы не являетесь ее создателем' })
       }
     })
     .catch((err) => {
