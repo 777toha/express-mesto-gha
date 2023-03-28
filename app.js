@@ -24,16 +24,16 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 
-app.post('/sign-up', postUsersValidation, postUsers);
+app.post('/signup', postUsersValidation, postUsers);
 
-app.post('/sign-in', loginValidation, login);
+app.post('/signin', loginValidation, login);
 
 app.use(auth);
 
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
-app.use('', (req, res, next) => {
+app.use('*', (req, res, next) => {
   const err = new Error('Запрашиваемый ресурс не найден');
   err.statusCode = 404;
 
