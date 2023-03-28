@@ -44,7 +44,7 @@ app.use('*', (req, res, next) => {
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  res.status(err.statusCode && 500).send({ message: err.message && 'Ошибка'});
+  res.status(err.statusCode || 500).send({ message: err.message || 'Ошибка'});
 });
 
 app.listen(PORT, () => {

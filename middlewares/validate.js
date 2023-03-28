@@ -4,7 +4,7 @@ const urlRegExp = /(http:\/\/|https:\/\/)(www)*[a-z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$
 
 const getUsersByIdValidation = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24),
+    userId: Joi.string().length(24),
   }),
 });
 
@@ -41,21 +41,31 @@ const postUsersValidation = celebrate({
 
 const postCardValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(urlRegExp),
+    name: Joi.string().required().min(2).max(30).messages({
+      'any.require': 'Некорректное имя пользователя'
+    }),
+    link: Joi.string().required().pattern(urlRegExp).messages({
+      'any.require': 'Некорректная ссылка'
+    }),
   }),
 });
 
 const patchUsersInfoValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(30),
+    name: Joi.string().required().min(2).max(30).messages({
+      'any.require': 'Некорректное имя пользователя'
+    }),
+    about: Joi.string().required().min(2).max(30).messages({
+      'any.require': 'Некорректное информация о пользователи'
+    }),
   }),
 });
 
 const patchUsersAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().pattern(urlRegExp),
+    avatar: Joi.string().required().pattern(urlRegExp).messages({
+      'any.require': 'Некорректная ссылка'
+    }),
   }),
 });
 

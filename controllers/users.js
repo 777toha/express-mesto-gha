@@ -39,7 +39,11 @@ const postUsers = (req, res, next) => {
         .catch(err => {
           if (err.name === 'ValidationError') {
             return res.status(BADREQ_CODE).send({ message: err.message });
-          } else {
+          }
+          if (err.name === 'MongoServerError') {
+              return res.status(409).send({ message: 'Такой email уже существует' });
+          }
+          else {
             return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
           }
         })
@@ -108,7 +112,7 @@ const login = (req, res, next) => {
     .orFail()
     .then(async (user) => {
       if (!user) {
-        res.send('Неправильные почта или пароль');
+        return res.status(401).send({ message: 'Неправильные почта или пароль' });
       }
       const data = await bcrypt.compare(password, user.password);
       if (data) {
@@ -117,13 +121,13 @@ const login = (req, res, next) => {
           httpOnly: true
         }).send(user);
       } else {
-        res.send('Неправильные почта или пароль');
+        return res.status(401).send({ message: 'Неправильные почта или пароль' });
       }
     })
     .catch(err => {
       res
         .status(401)
-        .send( 'Ошибка' );
+        .send({ message: 'Неправильные почта или пароль' });
     })
 };
 
