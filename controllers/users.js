@@ -7,6 +7,7 @@ const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const InternalServerError = require('../errors/InternalServerError');
 const ConflictError = require('../errors/ConflictError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const getMe = (req, res) => {
   User.findById(req.user._id)
@@ -125,7 +126,7 @@ const login = (req, res, next) => {
     .orFail()
     .then(async (user) => {
       if (!user) {
-        next(new BadRequestError('Неправильные почта или пароль'));
+        next(new UnauthorizedError('Неправильные почта или пароль'));
       }
       const data = await bcrypt.compare(password, user.password);
       if (data) {

@@ -35,18 +35,18 @@ const deleteCard = (req, res, next) => {
   Cards.findById(req.params.cardId)
     .orFail()
     .then((card) => {
-      if (card.owner === userId) {
+      if (card.owner.toString() === userId) {
         Cards.findByIdAndDelete(req.params.cardId)
           .then((user) => {
             res.send(user);
           })
           .catch((err) => {
             if (err) {
-              next(new NotFoundError('Такая карточка не найдена'));
+              next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
             }
           });
       } else {
-        next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
+        next(new NotFoundError('Такая карточка не найдена'));
       }
     })
     .catch((err) => {
