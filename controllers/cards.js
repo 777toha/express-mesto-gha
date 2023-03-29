@@ -25,8 +25,7 @@ const postCard = (req, res, next) => {
       } else {
         next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-    .catch(next);
+    });
 };
 
 const deleteCard = (req, res, next) => {
@@ -40,17 +39,13 @@ const deleteCard = (req, res, next) => {
           .then((user) => {
             res.send(user);
           })
-          .catch((err) => {
-            if (err) {
-              next(new NotFoundError('Такая карточка не найдена'));
-            }
-          });
+          .catch(next);
       } else {
         next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
       }
     })
     .catch((err) => {
-      if (req.params.cardId.length !== 24) {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Такая карточка не найдена'));
@@ -71,7 +66,7 @@ const putCardLike = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (req.params.cardId.length !== 24) {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Такая карточка не найдена'));
@@ -92,7 +87,7 @@ const deleteCardLike = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (req.params.cardId.length !== 24) {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Такая карточка не найдена'));

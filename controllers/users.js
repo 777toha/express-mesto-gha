@@ -9,23 +9,17 @@ const InternalServerError = require('../errors/InternalServerError');
 const ConflictError = require('../errors/ConflictError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-const getMe = (req, res) => {
+const getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       res.send(user);
-    });
+    })
+    .catch(next);
 };
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректные данные'));
-      } else {
-        next(new ConflictError('На сервере произошла ошибка'));
-      }
-    })
     .catch(next);
 };
 
@@ -73,7 +67,7 @@ const getUsersById = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (req.params.userId.length !== 24) {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Такой пользователь не найден'));
@@ -96,8 +90,10 @@ const patchUsersInfo = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err) {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные'));
+      } else {
+        next(err);
       }
     });
 };
@@ -113,11 +109,12 @@ const patchUsersAvatar = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err) {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const login = (req, res, next) => {
@@ -126,21 +123,18 @@ const login = (req, res, next) => {
     .orFail()
     .then(async (user) => {
       if (!user) {
-        next(new UnauthorizedError('Неправильные почта или пароль'));
+        return next(new UnauthorizedError('Неправильные почта или пароль'));
       }
       const data = await bcrypt.compare(password, user.password);
       if (data) {
         const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-        res.cookie('jwt', token, {
+        return res.cookie('jwt', token, {
           httpOnly: true,
         }).send({ message: 'Успешно' });
-      } else {
-        next(new BadRequestError('Неправильные почта или пароль'));
       }
+      return next(new UnauthorizedError('Неправильные почта или пароль'));
     })
-    .catch(() => {
-      next(new UnauthorizedError('Неправильные почта или пароль'));
-    });
+    .catch(next);
 };
 
 module.exports = {

@@ -8,6 +8,7 @@ const cardRouter = require('./routes/cards');
 const { postUsers, login } = require('./controllers/users');
 const { loginValidation, postUsersValidation } = require('./middlewares/validate');
 const { auth } = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const app = express();
 const PORT = 3000;
@@ -29,10 +30,7 @@ app.use('/', userRouter);
 app.use('/', cardRouter);
 
 app.use('*', (req, res, next) => {
-  const err = new Error('Запрашиваемый ресурс не найден');
-  err.statusCode = 404;
-
-  next(err);
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
 
 app.use(errors());
