@@ -139,7 +139,7 @@ const login = (req, res, next) => {
       }
     })
     .catch(() => {
-      next(new BadRequestError('Неправильные почта или пароль'));
+      next(new UnauthorizedError('Неправильные почта или пароль'));
     });
 };
 

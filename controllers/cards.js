@@ -42,11 +42,11 @@ const deleteCard = (req, res, next) => {
           })
           .catch((err) => {
             if (err) {
-              next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
+              next(new NotFoundError('Такая карточка не найдена'));
             }
           });
       } else {
-        next(new NotFoundError('Такая карточка не найдена'));
+        next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
       }
     })
     .catch((err) => {
