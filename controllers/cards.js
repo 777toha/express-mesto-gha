@@ -1,16 +1,16 @@
-const express = require('express');
 const Cards = require('../models/cards');
-const BADREQ_CODE = 400;
-const NOTFOUND_CODE = 404;
-const CONFLICT_CODE = 500;
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const InternalServerError = require('../errors/InternalServerError');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Cards.find({})
     .then((user) => {
       res.send(user);
     })
-    .catch(next)
-}
+    .catch(next);
+};
 
 const postCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -19,15 +19,15 @@ const postCard = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
     })
     .catch(next);
-}
+};
 
 const deleteCard = (req, res, next) => {
   const userId = req.user._id;
@@ -35,31 +35,30 @@ const deleteCard = (req, res, next) => {
   Cards.findById(req.params.cardId)
     .orFail()
     .then((card) => {
-      if (card.owner == userId) {
+      if (card.owner === userId) {
         Cards.findByIdAndDelete(req.params.cardId)
-          .then(user => {
+          .then((user) => {
             res.send(user);
           })
-          .catch(err => {
+          .catch((err) => {
             if (err) {
-              res.status(NOTFOUND_CODE).send(`При выполнении кода произошла ошибка ${err.name} c текстом ${err.message}`)
+              next(new NotFoundError('Такая карточка не найдена'));
             }
-          })
-          .catch(next);
+          });
       } else {
-        return res.status(403).send({ message: 'Вы не можете удалить карточку, если вы не являетесь ее создателем' })
+        next(new ForbiddenError('Вы не можете удалить карточку, если вы не являетесь ее создателем'));
       }
     })
     .catch((err) => {
       if (req.params.cardId.length !== 24) {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOTFOUND_CODE).send({ message: err.message });
+        next(new NotFoundError('Такая карточка не найдена'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-}
+    });
+};
 
 const putCardLike = (req, res, next) => {
   Cards.findByIdAndUpdate(
@@ -68,19 +67,19 @@ const putCardLike = (req, res, next) => {
     { new: true },
   )
     .orFail()
-    .then(user => {
+    .then((user) => {
       res.send(user);
     })
-    .catch(err => {
+    .catch((err) => {
       if (req.params.cardId.length !== 24) {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOTFOUND_CODE).send({ message: err.message });
+        next(new NotFoundError('Такая карточка не найдена'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-}
+    });
+};
 
 const deleteCardLike = (req, res, next) => {
   Cards.findByIdAndUpdate(
@@ -89,24 +88,24 @@ const deleteCardLike = (req, res, next) => {
     { new: true },
   )
     .orFail()
-    .then(user => {
+    .then((user) => {
       res.send(user);
     })
-    .catch(err => {
+    .catch((err) => {
       if (req.params.cardId.length !== 24) {
-        return res.status(BADREQ_CODE).send({ message: err.message });
+        next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        return res.status(NOTFOUND_CODE).send({ message: err.message });
+        next(new NotFoundError('Такая карточка не найдена'));
       } else {
-        return res.status(CONFLICT_CODE).send({ message: 'На сервере произошла ошибка' });
+        next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-}
+    });
+};
 
 module.exports = {
   getCards,
   postCard,
   deleteCard,
   putCardLike,
-  deleteCardLike
+  deleteCardLike,
 };

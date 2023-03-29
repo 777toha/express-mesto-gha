@@ -1,4 +1,3 @@
-const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -11,13 +10,14 @@ const ConflictError = require('../errors/ConflictError');
 
 const getMe = (req, res, next) => {
   User.findById(req.user._id)
-  .then(user => res.send(user));
-}
+    .then((user) => res.send(user));
+  next();
+};
 
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные'));
       } else {
@@ -25,50 +25,61 @@ const getUsers = (req, res, next) => {
       }
     })
     .catch(next);
-}
+};
 
 const postUsers = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+
   bcrypt.hash(password, 10)
     .then((hash) => {
-      User.create({ name, about, avatar, email, password: hash })
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      })
         .then((users) => res.send({
           name: users.name,
           about: users.about,
           avatar: users.avatar,
-          email: users.email
+          email: users.email,
         }))
-        .catch(err => {
+        .catch((err) => {
           if (err.name === 'ValidationError') {
             next(new BadRequestError('Некорректные данные'));
           }
           if (err.name === 'MongoServerError') {
             next(new ConflictError('Такой email уже существует'));
-          }
-          else {
+          } else {
             next(new InternalServerError('На сервере произошла ошибка'));
           }
-        })
-        .catch(next);
-    })
-}
+        });
+    });
+};
 
 const getUsersById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail()
     .then((user) => {
-      res.send(user)
+      res.send(user);
     })
-    .catch(err => {
+    .catch((err) => {
       if (req.params.userId.length !== 24) {
         next(new BadRequestError('Некорректные данные'));
       } else if (err.name === 'DocumentNotFoundError') {
-        next(new ConflictError('Такой email уже существует'));
+        next(new NotFoundError('Такой пользователь не найден'));
       } else {
         next(new InternalServerError('На сервере произошла ошибка'));
       }
-    })
-}
+    });
+};
 
 const patchUsersInfo = (req, res, next) => {
   const userId = req.user._id;
@@ -86,8 +97,8 @@ const patchUsersInfo = (req, res, next) => {
       if (err) {
         next(new BadRequestError('Некорректные данные'));
       }
-    })
-}
+    });
+};
 
 const patchUsersAvatar = (req, res, next) => {
   const userId = req.user._id;
@@ -105,7 +116,7 @@ const patchUsersAvatar = (req, res, next) => {
       }
     })
     .catch(next);
-}
+};
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -119,15 +130,15 @@ const login = (req, res, next) => {
       if (data) {
         const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
         res.cookie('jwt', token, {
-          httpOnly: true
-        }).send(user);
+          httpOnly: true,
+        }).send('Успешно');
       } else {
         next(new BadRequestError('Неправильные почта или пароль'));
       }
     })
-    .catch(err => {
+    .catch(() => {
       next(new BadRequestError('Неправильные почта или пароль'));
-    })
+    });
 };
 
 module.exports = {
@@ -137,5 +148,5 @@ module.exports = {
   patchUsersInfo,
   patchUsersAvatar,
   login,
-  getMe
+  getMe,
 };
