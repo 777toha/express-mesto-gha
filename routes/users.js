@@ -3,10 +3,10 @@ const express = require('express');
 const router = express.Router();
 const {
   getUsers,
+  getMe,
   getUsersById,
   patchUsersInfo,
   patchUsersAvatar,
-  getMe,
 } = require('../controllers/users');
 
 const { getUsersByIdValidation, patchUsersInfoValidation, patchUsersAvatarValidation } = require('../middlewares/validate');

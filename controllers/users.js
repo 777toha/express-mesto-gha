@@ -8,10 +8,11 @@ const NotFoundError = require('../errors/NotFoundError');
 const InternalServerError = require('../errors/InternalServerError');
 const ConflictError = require('../errors/ConflictError');
 
-const getMe = (req, res, next) => {
+const getMe = (req, res) => {
   User.findById(req.user._id)
-    .then((user) => res.send(user));
-  next();
+    .then((user) => {
+      res.send(user);
+    });
 };
 
 const getUsers = (req, res, next) => {
