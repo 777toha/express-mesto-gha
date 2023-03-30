@@ -80,11 +80,6 @@ const getUsersById = (req, res, next) => {
 const patchUsersInfo = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
-  if (!name) {
-    next(new BadRequestError('Некорректные данные'));
-  } else if (!about) {
-    next(new BadRequestError('Некорректные данные'));
-  }
   User.findByIdAndUpdate(userId, { name, about }, { new: true })
     .then((user) => {
       res.send(user);
@@ -101,9 +96,6 @@ const patchUsersInfo = (req, res, next) => {
 const patchUsersAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
-  if (!avatar) {
-    next(new BadRequestError('Некорректные данные'));
-  }
   User.findByIdAndUpdate(userId, { avatar }, { new: true })
     .then((user) => {
       res.send(user);
@@ -120,7 +112,6 @@ const patchUsersAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
-    .orFail()
     .then(async (user) => {
       if (!user) {
         return next(new UnauthorizedError('Неправильные почта или пароль'));
